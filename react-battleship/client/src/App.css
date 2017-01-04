@@ -15,7 +15,12 @@
 }
 
 .board {
-  color: red;
+
+}
+
+p {
+  font-size: 30px;
+  width: 20%;
 }
 
 @keyframes App-logo-spin {
