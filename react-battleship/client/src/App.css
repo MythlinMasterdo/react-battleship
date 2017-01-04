@@ -14,8 +14,8 @@
   color: white;
 }
 
-.App-intro {
-  font-size: large;
+.board {
+  color: red;
 }
 
 @keyframes App-logo-spin {
