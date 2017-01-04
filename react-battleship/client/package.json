@@ -6,6 +6,7 @@
     "react-scripts": "0.8.4"
   },
   "dependencies": {
+    "axios": "^0.15.3",
     "fixed-data-table": "^0.6.3",
     "react": "^15.4.1",
     "react-bootstrap-table": "^2.8.2",

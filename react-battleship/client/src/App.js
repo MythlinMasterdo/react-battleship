@@ -1,27 +1,59 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import axios from 'axios';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      boardData: []
+      boardData: [],
     }
   }
 
   fire(e) {
-    console.log('fire', e);
+    console.log('fire', e, 'board ', this.state.boardData);
+    var boardLetter;
+    var boardNumber = e.charAt(1);
+    console.log('num', boardNumber);
+    if(e.charAt(0) === "A") {
+      boardLetter = 0;
+    } else if(e.charAt(0) === "B") {
+      boardLetter = 1;
+    } else if(e.charAt(0) === "C") {
+      boardLetter = 2;
+    } else if(e.charAt(0) === "D") {
+      boardLetter = 3;
+    } else if(e.charAt(0) === "E") {
+      boardLetter = 4;
+    } else if(e.charAt(0) === "F") {
+      boardLetter = 5;
+    } else if(e.charAt(0) === "G") {
+      boardLetter = 6;
+    } else if(e.charAt(0) === "H") {
+      boardLetter = 7;
+    } else if(e.charAt(0) === "I") {
+      boardLetter = 8;
+    } else if(e.charAt(0) === "J") {
+      boardLetter = 9;
+    }
+    console.log('letter ', boardLetter);
+    console.log('location ', this.state.boardData[boardLetter][boardNumber]);
+    axios.post('http://localhost:8080/fire', {
+      boardPiece: e
+    })
+    .then(data => {
+      this.setState({"boardData[boardLetter][boardNumber]": <span className={e} key={e} onClick={this.fire.bind(this, e)}>Hi!!!!!</span>})
+    })
   }
 
   componentWillMount() {
     var count = 0;
     for(var i = 0; i < 10; i++) {
-      console.log('ran');
       var letters = ["A","B","C","D","E","F","G","H","I","J"];
       var row = [];
       for(var j = 1; j < 11; j++) {
-      row.push(<span className={letters[count] + j} key={letters[count] + j} onClick={this.fire.bind(this, letters[count] + j)}>O</span>);
+      row.push(<span className={letters[count] + j} key={letters[count] + j} onClick={this.fire.bind(this, letters[count] + j)}>0</span>);
       }
       this.state.boardData.push(row);
       count++;
