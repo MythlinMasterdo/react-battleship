@@ -7,15 +7,24 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      boardData: [],
+      boardState: 0,
+      boardPlayer1: [],
+      boardPlayer2: []
     }
   }
 
-  fire(e) {
-    console.log('fire', e, 'board ', this.state.boardData);
+  fire(e, player) {
+    //board is set to player1 or 2 depending on click
+    var board;
+    if(player === 1) {
+      board = this.state.boardPlayer1;
+    } else {
+      board = this.state.boardPlayer2;
+    }
     var boardLetter;
+    //boardNumber is xAxis
+    //boardLetter is yAxis
     var boardNumber = e.charAt(1);
-    console.log('num', boardNumber);
     if(e.charAt(0) === "A") {
       boardLetter = 0;
     } else if(e.charAt(0) === "B") {
@@ -37,48 +46,117 @@ class App extends Component {
     } else if(e.charAt(0) === "J") {
       boardLetter = 9;
     }
-    console.log('letter ', boardLetter);
-    console.log('location ', this.state.boardData[boardLetter][boardNumber]);
+    //send a POST request to backend with player and selected target
     axios.post('http://localhost:8080/fire', {
-      boardPiece: e
+      boardPiece: e,
+      player: player
     })
     .then(data => {
-      this.setState({"boardData[boardLetter][boardNumber]": <span className={e} key={e} onClick={this.fire.bind(this, e)}>Hi!!!!!</span>})
+      //index is set to the index of the players shot in state
+      var index = (boardLetter * 10) + Number(boardNumber);
+      console.log('data ', data.data);
+      //update board based on what was returned from POST request
+      if(data.data === 'Miss') {
+        board[index - 1][1] = "*";
+      } else if(data.data === "Hit!") {
+        board[index - 1][1] = "X";
+      //if we get back either of these then the game is over and let the users know
+      } else if(data.data === "Player1 Wins!" || data.data === "Player2 Wins!") {
+        alert(data.data);
+      }
+      //an empty setState triggers a rerender of our components and is needed to update the boards
+      this.setState({});
+    })
+    .catch(err => {
+      console.log('err ', err);
+    })
+  }
+  //sets up the initial board state for both players on load
+  componentWillMount() {
+    var boardPlayer1 = [];
+    var boardPlayer2 = [];
+    var count = 0;
+    //outer loop is for yAxis
+    for(var i = 0; i < 10; i++) {
+      var letters = ["A","B","C","D","E","F","G","H","I","J"];
+      for(var j = 1; j < 11; j++) {
+        //inner loop is for xAxis
+        boardPlayer1.push([letters[count] + j, 0]);
+        boardPlayer2.push([letters[count] + j, 0]);
+      }
+      count++;
+      this.setState({boardPlayer1: boardPlayer1, boardPlayer2: boardPlayer2});
+    }
+}
+  //once components have mounted send a get request to the backend to initiate the game
+  componentDidMount() {
+    axios.get('http://localhost:8080/')
+    .then(function(response) {
+      console.log('response: ', response.data);
+    })
+    .catch(function(err) {
+      console.log('response error ', err);
     })
   }
 
-  componentWillMount() {
+  render() {
+    //each player has a unique board
+    var boardDataPlayer1 = [];
+    var boardDataPlayer2 = [];
     var count = 0;
+    var boardPieceIndex = 0;
+    //outer loop is similar to componentWillMount in operation
     for(var i = 0; i < 10; i++) {
       var letters = ["A","B","C","D","E","F","G","H","I","J"];
-      var row = [];
+      var rowPlayer1 = [];
+      var rowPlayer2 = [];
       for(var j = 1; j < 11; j++) {
-      row.push(<span className={letters[count] + j} key={letters[count] + j} onClick={this.fire.bind(this, letters[count] + j)}>0</span>);
+        //create a span tag for each A1, A2, A3, etc... so we can indiviudally update each tag, value is set to this specific x and y position in state
+        rowPlayer1.push(<span className={letters[count] + j} key={letters[count] + j} onClick={this.fire.bind(this, letters[count] + j, 1)}>{this.state.boardPlayer1[boardPieceIndex][1]}</span>);
+        rowPlayer2.push(<span className={letters[count] + j} key={letters[count] + j} onClick={this.fire.bind(this, letters[count] + j, 2)}>{this.state.boardPlayer2[boardPieceIndex][1]}</span>);
+        boardPieceIndex++;
       }
-      this.state.boardData.push(row);
+      //push each row into the correct player board once we have filled a 0-10 for A, B, C, etc.. to create a multidimensional array
+      boardDataPlayer1.push(rowPlayer1);
+      boardDataPlayer2.push(rowPlayer2);
       count++;
     }
-    console.log(this.state.boardData);
-  }
-  render() {
     return (
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to Battleship</h2>
+          <h3>0 = Untouched,  X = Hit,   * = Miss</h3>
         </div>
-        <div className="board">
-          <p> 1 2 3 4 5 6 7 8 9 10 </p>
-          <p>A {this.state.boardData[0]}</p>
-          <p>B {this.state.boardData[1]}</p>
-          <p>C {this.state.boardData[2]}</p>
-          <p>D {this.state.boardData[3]}</p>
-          <p>E {this.state.boardData[4]}</p>
-          <p>F {this.state.boardData[5]}</p>
-          <p>G {this.state.boardData[6]}</p>
-          <p>H {this.state.boardData[7]}</p>
-          <p>I {this.state.boardData[8]}</p>
-          <p>J {this.state.boardData[9]}</p>
+        <div className="gameBoards">
+          <div className="board1">
+            <p>Player 2 shoot here</p>
+            <h4>1 2 3 4 5 6 7 8 9 10</h4>
+            <p>A {boardDataPlayer1[0]}</p>
+            <p>B {boardDataPlayer1[1]}</p>
+            <p>C {boardDataPlayer1[2]}</p>
+            <p>D {boardDataPlayer1[3]}</p>
+            <p>E {boardDataPlayer1[4]}</p>
+            <p>F {boardDataPlayer1[5]}</p>
+            <p>G {boardDataPlayer1[6]}</p>
+            <p>H {boardDataPlayer1[7]}</p>
+            <p>I {boardDataPlayer1[8]}</p>
+            <p>J {boardDataPlayer1[9]}</p>
+          </div>
+          <div className="board2">
+            <p>Player 1 shoot here</p>
+            <h4>1 2 3 4 5 6 7 8 9 10</h4>
+            <p>A {boardDataPlayer2[0]}</p>
+            <p>B {boardDataPlayer2[1]}</p>
+            <p>C {boardDataPlayer2[2]}</p>
+            <p>D {boardDataPlayer2[3]}</p>
+            <p>E {boardDataPlayer2[4]}</p>
+            <p>F {boardDataPlayer2[5]}</p>
+            <p>G {boardDataPlayer2[6]}</p>
+            <p>H {boardDataPlayer2[7]}</p>
+            <p>I {boardDataPlayer2[8]}</p>
+            <p>J {boardDataPlayer2[9]}</p>
+          </div>
         </div>
       </div>
     );

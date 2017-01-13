@@ -7,11 +7,8 @@
   },
   "dependencies": {
     "axios": "^0.15.3",
-    "fixed-data-table": "^0.6.3",
     "react": "^15.4.1",
-    "react-bootstrap-table": "^2.8.2",
-    "react-dom": "^15.4.1",
-    "react-simple-table": "^1.0.1"
+    "react-dom": "^15.4.1"
   },
   "scripts": {
     "start": "react-scripts start",

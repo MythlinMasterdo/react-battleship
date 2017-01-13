@@ -14,12 +14,33 @@
   color: white;
 }
 
-.board {
+body {
+  background-image: url("../public/battleshipBackground.jpg");
+}
 
+.gameBoards {
+  position: relative;
+  display: table;
+  width: 100%;
+}
+
+h4 {
+  position: relative;
+  left: -39%; 
+}
+
+.board1 {
+  display:table-cell;
+}
+
+.board2 {
+  clear: both;
+  display:table-cell;
+  overflow: hidden;
 }
 
 p {
-  font-size: 30px;
+  font-size: 25px;
   width: 20%;
 }
 
